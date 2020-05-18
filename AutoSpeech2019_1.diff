@@ -1,0 +1,639 @@
+diff --git a/AutoSpeech-master/code_submission/model.py b/m017/3rdparty/AutoSpeech/code_submission/model.py
+index 27932ef..dec6fc8 100644
+--- a/AutoSpeech-master/code_submission/model.py
++++ b/m017/3rdparty/AutoSpeech/code_submission/model.py
+@@ -15,6 +15,8 @@ config = tf.ConfigProto()
+ config.gpu_options.allow_growth = True
+ # to log device placement (on which device the operation ran)
+ config.log_device_placement = False
++config.gpu_options.per_process_gpu_memory_fraction = 0.5
++
+ # (nothing gets printed in Jupyter, only if you run it standalone)
+ sess = tf.Session(config=config)
+ # set this TensorFlow session as the default session for Keras
+diff --git a/AutoSpeech-master/code_submission/model_manager.py b/m017/3rdparty/AutoSpeech/code_submission/model_manager.py
+index 695f319..ebae341 100644
+--- a/AutoSpeech-master/code_submission/model_manager.py
++++ b/m017/3rdparty/AutoSpeech/code_submission/model_manager.py
+@@ -330,9 +330,9 @@ class ModelManager(Classifier):
+                                                                         max_duration=SECOND_ROUND_DURATION,
+                                                                         is_mfcc=self._use_mfcc)
+             if self._round_num > 1:
+-                y_pred = self._model.predict(self._test_x, batch_size=32)
++                y_pred = self._model.predict(self._test_x, batch_size=8)
+             else:
+-                y_pred = self._model.predict(self._test_x, batch_size=32 * 8)
++                y_pred = self._model.predict(self._test_x, batch_size=32)
+             if self._k_best_auc[-1] < auc and auc > self._each_model_best_auc[LR_MODEL][-1] - 0.1:
+                 self._k_best_predicts[-1] = y_pred
+                 self._k_best_auc[-1] = auc
+diff --git a/AutoSpeech-master/code_submission/models/attention_gru.py b/m017/3rdparty/AutoSpeech/code_submission/models/attention_gru.py
+index 91a339a..21c505c 100644
+--- a/AutoSpeech-master/code_submission/models/attention_gru.py
++++ b/m017/3rdparty/AutoSpeech/code_submission/models/attention_gru.py
+@@ -90,8 +90,8 @@ class AttentionGru(Classifier):
+                         callbacks=callbacks,
+                         validation_data=(val_x, ohe2cat(val_y)),
+                         verbose=1,  # Logs once per epoch.
+-                        batch_size=32,
++                        batch_size=16,
+                         shuffle=True)
+ 
+-    def predict(self, x_test, batch_size=32):
++    def predict(self, x_test, batch_size=16):
+         return self._model.predict(x_test, batch_size=batch_size)
+diff --git a/AutoSpeech-master/code_submission/models/cnn.py b/m017/3rdparty/AutoSpeech/code_submission/models/cnn.py
+index 0898b4c..0a7d0c5 100644
+--- a/AutoSpeech-master/code_submission/models/cnn.py
++++ b/m017/3rdparty/AutoSpeech/code_submission/models/cnn.py
+@@ -143,10 +143,10 @@ class CnnModel2D(Classifier):
+                         callbacks=callbacks,
+                         validation_data=(val_x, ohe2cat(val_y)),
+                         verbose=1,  # Logs once per epoch.
+-                        batch_size=32,
++                        batch_size=16,
+                         shuffle=True)
+ 
+-    def predict(self, x_test, batch_size=32):
++    def predict(self, x_test, batch_size=16):
+         return self._model.predict(x_test, batch_size=batch_size)
+ 
+ 
+diff --git a/AutoSpeech-master/code_submission/models/crnn.py b/m017/3rdparty/AutoSpeech/code_submission/models/crnn.py
+index 9c305ad..995bc89 100644
+--- a/AutoSpeech-master/code_submission/models/crnn.py
++++ b/m017/3rdparty/AutoSpeech/code_submission/models/crnn.py
+@@ -130,8 +130,8 @@ class CrnnModel(Classifier):
+                         callbacks=callbacks,
+                         validation_data=(val_x, ohe2cat(val_y)),
+                         verbose=1,  # Logs once per epoch.
+-                        batch_size=32,
++                        batch_size=16,
+                         shuffle=True)
+ 
+-    def predict(self, x_test, batch_size=32):
++    def predict(self, x_test, batch_size=16):
+         return self._model.predict(x_test, batch_size=batch_size)
+diff --git a/AutoSpeech-master/sample_data/DEMO/DEMO.data/meta.json b/AutoSpeech-master/sample_data/DEMO/DEMO.data/meta.json
+deleted file mode 100644
+index 3d8c126..0000000
+--- a/AutoSpeech-master/sample_data/DEMO/DEMO.data/meta.json
++++ /dev/null
+@@ -1 +0,0 @@
+-{"class_num": 7, "train_num": 428, "test_num": 107, "file_format": "wav", "sample_rate": 16000}
+\ No newline at end of file
+diff --git a/AutoSpeech-master/sample_data/DEMO/DEMO.data/test.pkl b/AutoSpeech-master/sample_data/DEMO/DEMO.data/test.pkl
+deleted file mode 100644
+index a7c695c..0000000
+Binary files a/AutoSpeech-master/sample_data/DEMO/DEMO.data/test.pkl and /dev/null differ
+diff --git a/AutoSpeech-master/sample_data/DEMO/DEMO.data/train.pkl b/AutoSpeech-master/sample_data/DEMO/DEMO.data/train.pkl
+deleted file mode 100644
+index 98e1ca6..0000000
+Binary files a/AutoSpeech-master/sample_data/DEMO/DEMO.data/train.pkl and /dev/null differ
+diff --git a/AutoSpeech-master/sample_data/DEMO/DEMO.data/train.solution b/AutoSpeech-master/sample_data/DEMO/DEMO.data/train.solution
+deleted file mode 100644
+index 09480f2..0000000
+--- a/AutoSpeech-master/sample_data/DEMO/DEMO.data/train.solution
++++ /dev/null
+@@ -1,428 +0,0 @@
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 1 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 1 0 0 0 0
+-0 0 1 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 1 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 1 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 1 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-0 0 1 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 1 0 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 1 0 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 1 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 1 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 1 0
+-0 0 1 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 1 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 0 1 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 0 1 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 1 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-0 0 0 1 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 1 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 1 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 1 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 1 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 1 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 1 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+diff --git a/AutoSpeech-master/sample_data/DEMO/DEMO.solution b/AutoSpeech-master/sample_data/DEMO/DEMO.solution
+deleted file mode 100644
+index 7d00f04..0000000
+--- a/AutoSpeech-master/sample_data/DEMO/DEMO.solution
++++ /dev/null
+@@ -1,107 +0,0 @@
+-0 0 0 1 0 0 0
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 1 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 1 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-1 0 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 1 0 0 0 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 1 0
+-0 0 0 0 0 0 1
+-0 0 0 0 0 0 1
+-1 0 0 0 0 0 0
+-0 0 0 1 0 0 0
+-0 0 0 0 0 0 1
+-0 1 0 0 0 0 0
+-0 0 0 0 1 0 0
+-0 0 0 0 0 1 0
+-0 0 0 0 1 0 0
+-0 0 0 1 0 0 0
+-1 0 0 0 0 0 0

@@ -1,0 +1,3 @@
+[submodule "3rdparty/voxceleb_trainer"]
+	path = 3rdparty/voxceleb_trainer
+	url = https://github.com/clovaai/voxceleb_trainer/

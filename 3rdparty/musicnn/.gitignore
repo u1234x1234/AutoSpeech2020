@@ -1,0 +1,9 @@
+.ipynb_checkpoints/
+.ipynb
+musicnn/__pycache__/
+*.tags
+build/*
+dist/*
+env/*
+musicnn.egg-info/*
+audio/more/*
