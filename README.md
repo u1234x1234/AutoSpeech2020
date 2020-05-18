@@ -1,7 +1,7 @@
 [![license](https://img.shields.io/badge/license-GPL%203.0-green.svg)](https://github.com/u1234x1234/AutoSpeech2020/blob/master/LICENSE)
 
 # AutoSpeech2020
-1st place solution
+1st place solution https://www.automl.ai/competitions/2
 
 ## Usage
 
